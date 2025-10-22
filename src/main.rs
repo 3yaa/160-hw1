@@ -29,36 +29,31 @@ struct Repo {
     forks_count: u64,
     language: String,
     open_issues_count: u64,
+    stargazers_count: u64,
     #[serde(skip)]
     sha: Vec<Commit>,   
 }
-
-#[derive(Debug, Deserialize)]
-struct Details {
-    date: String,
-    name: String,
-    email: String,
-}
-
-// #[derive(Debug, Deserialize)]
-// struct AdditionalRepo {
-//     forks: Vec<Repo>,        
-//     commit: Vec<Commit>, 
-//     issues: Vec<Issue>,
-//     commit_count: u64,   
-// }
 
 #[derive(Debug, serde::Deserialize)]
 struct Commit {
     sha: String,
 }
 
+#[derive(Debug, serde::Deserialize)]
+struct CommitFiles {
+    #[serde(default)]
+    files: Vec<File>,
+}
+
+#[derive(Debug, serde::Deserialize)]
+struct File {
+    filename: String,
+}
+
 #[derive(Debug, Deserialize)]
 struct SearchResult {
     items: Vec<Repo>,
 }
-
-
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::new();
@@ -77,6 +72,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .send()? // returns Reponse object 
         .json::<SearchResult>()?; // parse JSON into the struct Repo
 
+    // hashmap to store filename -> # of times modified
+    let mut file_modified_count: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+
     for repo in &mut repo_res.items {
         let commits_url = format!(
             "https://api.github.com/repos/{}/{}/commits?per_page=50",
@@ -85,13 +83,39 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let commit_res = client
             .get(commits_url)
             .header(USER_AGENT, "rust-client")
+            .header(ACCEPT, "application/vnd.github+json") // [Accept] required by the github API
             .header("X-GitHub-Api-Version", "2022-11-28")
             .send()?
             .json::<Vec<Commit>>()?;
 
-        repo.sha = commit_res
+        // get the sha vector, and look through the 50 recent commits and list which files were modified into hashmap
+        repo.sha = commit_res;
+        for entry in &repo.sha {
+            let sha_url = format!("https://api.github.com/repos/{}/{}/commits/{}", repo.owner.login, repo.name, entry.sha);
+            let sha_res = client 
+                .get(sha_url)
+                .header(USER_AGENT, "rust-client")
+                .header(ACCEPT, "application/vnd.github+json") // [Accept] required by the github API
+                .header("X-GitHub-Api-Version", "2022-11-28")
+                .send()?
+                .json::<CommitFiles>()?;
+            for file in sha_res.files {
+                *file_modified_count.entry(file.filename).or_insert(0) += 1;
+            }
+        }
     }
 
+    let mut top_files: Vec<_> = file_modified_count.iter().collect();
+    // sort by descending order
+    top_files.sort_by(|a,b| b.1.cmp(a.1)); 
+    println!("Top 3 modified files:");
+    for (file, count) in top_files.clone().into_iter().take(3) {
+        println!("{} was modified {} times", file, count);
+    }
+    println!("All modified files:");
+    for (file, count) in top_files.into_iter().take(3) {
+        println!("{} was modified {} times", file, count);
+    }
 
      // temporary check
     for repo in repo_res.items { 
