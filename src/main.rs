@@ -33,48 +33,34 @@ async fn get_forks_info(repo: &mut repo::Repo) {
 async fn get_commits_info(repo: &mut repo::Repo) {
     match api::fetch_commits(&repo.owner_login, &repo.name, 50).await {
         Ok(commits) => {
-            // Look at first commit to see its structure
-            if let Some(first_commit) = commits.first() {
-                let sha = first_commit["sha"].as_str().unwrap_or("unknown");
-                // Fetch detailed info for first commit (to see files)
-                if sha != "unknown" {
+            use std::collections::HashMap;
+            let mut file_counts: HashMap<String, u32> = HashMap::new();
+
+            for commit in &commits {
+                if let Some(sha) = commit["sha"].as_str() {
                     match api::fetch_commit_details(&repo.owner_login, &repo.name, sha).await {
                         Ok(detail) => {
                             if let Some(files) = detail["files"].as_array() {
-                                // Use a HashMap for aggregation (recommended for performance)
-                                use std::collections::HashMap;
-                                let mut file_counts: HashMap<String, u32> = HashMap::new();
-
                                 for file in files {
                                     let filename =
                                         file["filename"].as_str().unwrap_or("unknown").to_string();
                                     *file_counts.entry(filename).or_insert(0) += 1;
                                 }
-
-                                // Merge HashMap results with repo.top_modified_files
-                                for (filename, count) in file_counts {
-                                    if let Some(entry) = repo
-                                        .top_modified_files
-                                        .iter_mut()
-                                        .find(|(name, _)| *name == filename)
-                                    {
-                                        entry.1 += count;
-                                    } else {
-                                        repo.top_modified_files.push((filename, count));
-                                    }
-                                }
-
-                                // Sort descending by modification count
-                                repo.top_modified_files.sort_by(|a, b| b.1.cmp(&a.1));
-
-                                // Keep only top 3
-                                repo.top_modified_files.truncate(3);
                             }
                         }
                         Err(e) => println!("----->error fetching commit details: {}", e),
                     }
                 }
             }
+
+            // convert hash into vec
+            repo.top_modified_files = file_counts.into_iter().collect();
+
+            // sort
+            repo.top_modified_files.sort_by(|a, b| b.1.cmp(&a.1));
+
+            // keep top 3
+            repo.top_modified_files.truncate(3);
         }
         Err(e) => {
             println!("   Error fetching commits: {}", e);
