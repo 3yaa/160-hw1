@@ -1,6 +1,5 @@
 mod api;
 mod models;
-mod stats;
 mod storage;
 
 use models::fork;
@@ -98,24 +97,33 @@ async fn main() -> Result<(), Box<dyn Error>> {
             get_forks_info(repo).await;
             // fetch commits for repo
             get_commits_info(repo).await;
+        }
+        // ADD UP FOR TOP 10
+        let total_stars: u64 = repos.iter().map(|r| r.stars).sum();
+        let total_forks: u64 = repos.iter().map(|r| r.forks_count).sum();
+        let total_fork_commits: u64 = repos.iter().map(|r| r.fork_commit_count).sum();
+        let total_open_issues: u64 = repos.iter().map(|r| r.open_issues_count).sum();
 
-            // DISPLAY
-            println!("--------------------------------------------");
-            println!("Language: {}", repo.language);
-            println!("Total stars: {}", repo.stars);
-            println!("Total forks: {}", repo.forks_count);
-            println!("Top-3 Most modified file per repo");
+        // DISPLAY TOP 10
+        println!("--------------------------------------------");
+        println!("Language: {}", lang);
+        println!("Total stars: {}", total_stars);
+        println!("Total forks: {}", total_forks);
+        println!("Top-3 Most modified file per repo");
+        for repo in repos {
             for (index, (filename, count)) in repo.top_modified_files.iter().enumerate() {
                 println!("Repo name: {}", repo.name);
                 println!(
                     "File name {}: {}, Modifications: {}",
-                    index, filename, count
+                    index + 1,
+                    filename,
+                    count
                 );
             }
-            println!("New commits in forked repos: {}", repo.fork_commit_count);
-            println!("Open issues in top-10 repos: {}", repo.open_issues_count);
-            println!("--------------------------------------------");
         }
+        println!("New commits in forked repos: {}", total_fork_commits);
+        println!("Open issues in top-10 repos: {}", total_open_issues);
+        println!("--------------------------------------------");
     }
     Ok(())
 }

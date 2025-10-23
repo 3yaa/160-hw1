@@ -5,6 +5,7 @@ pub struct Repo {
     pub owner_login: String,
     #[allow(dead_code)]
     pub html_url: String,
+    #[allow(dead_code)]
     pub language: String,
     // stats
     pub stars: u64,

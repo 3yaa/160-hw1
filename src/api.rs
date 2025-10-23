@@ -18,7 +18,7 @@ pub async fn fetch_top_repos(language: &str) -> Result<Vec<Value>, Box<dyn Error
     let response = client
         .get(&url)
         .header("User-Agent", "160-hw1")
-        .header("Authorization", format!("Bearer {}", get_token())) // ← Use token
+        .header("Authorization", format!("Bearer {}", get_token()))
         .send()
         .await?;
 
@@ -41,7 +41,7 @@ pub async fn fetch_forks(owner: &str, repo: &str) -> Result<Vec<Value>, Box<dyn 
     let response = client
         .get(&url)
         .header("User-Agent", "160-hw1")
-        .header("Authorization", format!("Bearer {}", get_token())) // ← Use token
+        .header("Authorization", format!("Bearer {}", get_token()))
         .send()
         .await?;
 
@@ -63,7 +63,7 @@ pub async fn fetch_commits(
     let response = client
         .get(&url)
         .header("User-Agent", "160-hw1")
-        .header("Authorization", format!("Bearer {}", get_token())) // ← Use token
+        .header("Authorization", format!("Bearer {}", get_token()))
         .send()
         .await?;
 
@@ -85,7 +85,7 @@ pub async fn fetch_commit_details(
     let response = client
         .get(&url)
         .header("User-Agent", "160-hw1")
-        .header("Authorization", format!("Bearer {}", get_token())) // ← Use token
+        .header("Authorization", format!("Bearer {}", get_token()))
         .send()
         .await?;
 
