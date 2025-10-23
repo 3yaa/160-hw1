@@ -8,13 +8,24 @@ use std::error::Error;
 use redis::{AsyncCommands, RedisResult};
 use std::collections::HashMap;
 
+// Purpose:
+// get the forks using GitHub API
+// inputs:
+// @repo : use member variables for GitHub API calls
+// modified:
+// @fork_commit_count : an int that holds the total commits among the forks of a given @repo
 async fn get_forks_info(repo: &mut repo::Repo) {
+    // call GitHub API call for forks
     match api::fetch_forks(&repo.owner_login, &repo.name).await {
-        Ok(forks_json) => {
+        Ok(forks_json) => { 
+            // declare vector of Forks with parsed forks from json 
             let forks = fork::parse_forks(forks_json);
+            // @fork_commit_count : get the number of new commits in the forked repos
             let mut fork_commit_count: u64 = 0;
             // fetch recent commits
             for fork in &forks {
+                // TODO: CHANGE THIS TO 20 LATER 
+                // get the 20 most recent forked repos using GitHub API call
                 match api::fetch_commits(&fork.owner_login, &fork.name, 10).await {
                     Ok(commits) => {
                         fork_commit_count += commits.len() as u64;
@@ -24,20 +35,33 @@ async fn get_forks_info(repo: &mut repo::Repo) {
                     }
                 }
             }
+            // save fork_commit_count into repo
             repo.fork_commit_count = fork_commit_count;
         }
-        Err(e) => {
+        Err(e) => { 
             println!("---->error fetching forks: {}", e);
         }
     }
 }
 
+// Purpose:
+// get the commits info using GitHub API
+// inputs:
+// @repo : use member variables for GitHub API calls
+// modified:
+// @top_modified_files : set to the top 3 modified files of a given @repo
 async fn get_commits_info(repo: &mut repo::Repo) {
+    // make GitHub API call for 50 most recent commits
     match api::fetch_commits(&repo.owner_login, &repo.name, 50).await {
         Ok(commits) => {
-            use std::collections::HashMap;
+            // declare HashMap file_counts to keep track of what files exist and how many times
+            // they were edited
+            use std::collections::HashMap; // why here?
             let mut file_counts: HashMap<String, u32> = HashMap::new();
 
+            // go through each commit and extract the sha
+            // using the sha, use the GitHub API to grab the modified files of said commit 
+            // update hashmap accordingly and increment or initialize depending on if it exists or not respectively
             for commit in &commits {
                 if let Some(sha) = commit["sha"].as_str() {
                     match api::fetch_commit_details(&repo.owner_login, &repo.name, sha).await {
@@ -70,8 +94,20 @@ async fn get_commits_info(repo: &mut repo::Repo) {
     }
 }
 
+
+// main function:
+// makes calls to helper functions:
+//      get_forks_info()
+//      get_commits_info()
+//
+// afterwards, print out relevant information regarding the repos 
+//
+// then, clone and inspect repositories
+//
+// lastly, upload the repository details to Redis 
 #[tokio::main] //sets up the async runtime  
 async fn main() -> Result<(), Box<dyn Error>> {
+    // Add C later?
     let languages = vec!["Rust", "C++", "Java"];
 
     // loop thru each lang

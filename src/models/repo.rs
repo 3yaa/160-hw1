@@ -16,6 +16,12 @@ pub struct Repo {
     pub fork_commit_count: u64,
 }
 
+// Purpose:
+// parse the json for relevant fields 
+// inputs:
+// @json : the json containing relevant information to be parsed into the Repo object
+// return:
+// a Repo struct based on the parsed json information
 pub fn parse_repo(json: &Value) -> Option<Repo> {
     Some(Repo {
         name: json["name"].as_str()?.to_string(),
@@ -31,6 +37,12 @@ pub fn parse_repo(json: &Value) -> Option<Repo> {
     })
 }
 
+// Purpose:
+// parse an array of json's and call parse_repo() to get relevant fields
+// inputs:
+// @json_array : an array of json to be parsed; each json object is subsequently used to call parse(repo)
+// return:
+// a list of Repo Objects containing parsed information based on json_array
 pub fn parse_repos(json_array: Vec<Value>) -> Vec<Repo> {
     json_array
         .iter()
