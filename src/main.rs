@@ -1,3 +1,121 @@
-fn main() {
-    println!("Hello, world!");
+mod api;
+mod models;
+mod stats;
+mod storage;
+
+use models::fork;
+use models::repo;
+use std::error::Error;
+
+async fn get_forks_info(repo: &mut repo::Repo) {
+    match api::fetch_forks(&repo.owner_login, &repo.name).await {
+        Ok(forks_json) => {
+            let forks = fork::parse_forks(forks_json);
+            let mut fork_commit_count: u64 = 0;
+            // fetch recent commits
+            for fork in &forks {
+                match api::fetch_commits(&fork.owner_login, &fork.name, 10).await {
+                    Ok(commits) => {
+                        fork_commit_count += commits.len() as u64;
+                    }
+                    Err(e) => {
+                        println!("---->error fetching commits: {}", e);
+                    }
+                }
+            }
+            repo.fork_commit_count = fork_commit_count;
+        }
+        Err(e) => {
+            println!("---->error fetching forks: {}", e);
+        }
+    }
+}
+
+async fn get_commits_info(repo: &mut repo::Repo) {
+    match api::fetch_commits(&repo.owner_login, &repo.name, 50).await {
+        Ok(commits) => {
+            // Look at first commit to see its structure
+            if let Some(first_commit) = commits.first() {
+                let sha = first_commit["sha"].as_str().unwrap_or("unknown");
+                // Fetch detailed info for first commit (to see files)
+                if sha != "unknown" {
+                    match api::fetch_commit_details(&repo.owner_login, &repo.name, sha).await {
+                        Ok(detail) => {
+                            if let Some(files) = detail["files"].as_array() {
+                                // Use a HashMap for aggregation (recommended for performance)
+                                use std::collections::HashMap;
+                                let mut file_counts: HashMap<String, u32> = HashMap::new();
+
+                                for file in files {
+                                    let filename =
+                                        file["filename"].as_str().unwrap_or("unknown").to_string();
+                                    *file_counts.entry(filename).or_insert(0) += 1;
+                                }
+
+                                // Merge HashMap results with repo.top_modified_files
+                                for (filename, count) in file_counts {
+                                    if let Some(entry) = repo
+                                        .top_modified_files
+                                        .iter_mut()
+                                        .find(|(name, _)| *name == filename)
+                                    {
+                                        entry.1 += count;
+                                    } else {
+                                        repo.top_modified_files.push((filename, count));
+                                    }
+                                }
+
+                                // Sort descending by modification count
+                                repo.top_modified_files.sort_by(|a, b| b.1.cmp(&a.1));
+
+                                // Keep only top 3
+                                repo.top_modified_files.truncate(3);
+                            }
+                        }
+                        Err(e) => println!("----->error fetching commit details: {}", e),
+                    }
+                }
+            }
+        }
+        Err(e) => {
+            println!("   Error fetching commits: {}", e);
+        }
+    }
+}
+
+#[tokio::main] //sets up the async runtime  
+async fn main() -> Result<(), Box<dyn Error>> {
+    let languages = vec!["Rust", "C++", "Java"];
+
+    // loop thru each lang
+    for lang in languages {
+        // fetch top 10 repo
+        let repos_json = api::fetch_top_repos(lang).await?;
+        let mut repos = repo::parse_repos(repos_json);
+        // process each repo
+        for repo in &mut repos {
+            // fetch forks for repo
+            get_forks_info(repo).await;
+            // fetch commits for repo
+            get_commits_info(repo).await;
+
+            // DISPLAY
+            println!("--------------------------------------------");
+            println!("Language: {}", repo.language);
+            println!("Total stars: {}", repo.stars);
+            println!("Total forks: {}", repo.forks_count);
+            println!("Top-3 Most modified file per repo");
+            for (index, (filename, count)) in repo.top_modified_files.iter().enumerate() {
+                println!("Repo name: {}", repo.name);
+                println!(
+                    "File name {}: {}, Modifications: {}",
+                    index, filename, count
+                );
+            }
+            println!("New commits in forked repos: {}", repo.fork_commit_count);
+            println!("Open issues in top-10 repos: {}", repo.open_issues_count);
+            println!("--------------------------------------------");
+        }
+    }
+    Ok(())
 }
