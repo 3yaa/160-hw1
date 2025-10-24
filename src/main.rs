@@ -26,11 +26,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         // part B: showcase stat found in api calls
         data_manager::display_stat(&repos, lang);
-        // part C: download the top real repo
+        // part C/D: download the top real repo and then save into redis
         inspect_repo::clone_top_repo(&repos).await;
     }
 
-    // save redis to disk
+    // part D: save redis to disk
     redis::save_redis_to_disk().await;
 
     Ok(())

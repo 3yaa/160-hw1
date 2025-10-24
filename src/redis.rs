@@ -71,7 +71,7 @@ pub async fn save_redis_to_disk() {
         }
     };
 
-    // Force Redis to save to disk
+    // force redis to save to disk
     let _: Result<String, _> = redis::cmd("BGSAVE").query_async(&mut con).await;
     println!("Redis data saved to disk");
 }
