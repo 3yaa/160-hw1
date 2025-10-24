@@ -33,14 +33,8 @@ pub async fn fetch_top_repos(language: &str) -> Result<Vec<Value>, Box<dyn Error
         .header("Authorization", format!("Bearer {}", get_token()))
         .query(&params)
         .send()
-        .await?;
-
-    if !response.status().is_success() {
-        let status = response.status();
-        let error_text = response.text().await?;
-        eprintln!("API Error ({}): {}", status, error_text);
-        return Err(format!("GitHub API returned {}: {}", status, error_text).into());
-    }
+        .await?
+        .error_for_status()?;
 
     // get the json from response
     let json: Value = response.json().await?;
@@ -75,14 +69,8 @@ pub async fn fetch_forks(owner: &str, repo_name: &str) -> Result<Vec<Value>, Box
         .header("User-Agent", "160-hw1")
         .header("Authorization", format!("Bearer {}", get_token()))
         .send()
-        .await?;
-
-    if !response.status().is_success() {
-        let status = response.status();
-        let error_text = response.text().await?;
-        eprintln!("API Error ({}): {}", status, error_text);
-        return Err(format!("GitHub API returned {}: {}", status, error_text).into());
-    }
+        .await?
+        .error_for_status()?;
 
     // set forks to the list of json;
     // return error if failed
@@ -115,14 +103,9 @@ pub async fn fetch_commits(
         .header("User-Agent", "160-hw1")
         .header("Authorization", format!("Bearer {}", get_token()))
         .send()
-        .await?;
+        .await?
+        .error_for_status()?;
 
-    if !response.status().is_success() {
-        let status = response.status();
-        let error_text = response.text().await?;
-        eprintln!("API Error ({}): {}", status, error_text);
-        return Err(format!("GitHub API returned {}: {}", status, error_text).into());
-    }
     // grab the list of json,
     // return error if failed
     let commits: Vec<Value> = response.json().await?;
@@ -154,13 +137,8 @@ pub async fn fetch_commit_details(
         .header("User-Agent", "160-hw1")
         .header("Authorization", format!("Bearer {}", get_token()))
         .send()
-        .await?;
-    if !response.status().is_success() {
-        let status = response.status();
-        let error_text = response.text().await?;
-        eprintln!("API Error ({}): {}", status, error_text);
-        return Err(format!("GitHub API returned {}: {}", status, error_text).into());
-    }
+        .await?
+        .error_for_status()?;
 
     // commit_detail is a json
     let commit_detail: Value = response.json().await?;
@@ -184,14 +162,8 @@ pub async fn fetch_repo_tree(
         .header("User-Agent", "160-hw1")
         .header("Authorization", format!("Bearer {}", get_token()))
         .send()
-        .await?;
-
-    if !response.status().is_success() {
-        let status = response.status();
-        let error_text = response.text().await?;
-        eprintln!("API Error ({}): {}", status, error_text);
-        return Err(format!("GitHub API returned {}: {}", status, error_text).into());
-    }
+        .await?
+        .error_for_status()?;
 
     let json: Value = response.json().await?;
     let tree = json["tree"].as_array().ok_or("No tree found")?.clone();

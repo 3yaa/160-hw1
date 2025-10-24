@@ -25,7 +25,13 @@ pub async fn get_forks_info(repo: &mut repo::Repo) {
                         fork_commit_count += commits.len() as u64;
                     }
                     Err(e) => {
-                        println!("---->error fetching commits: {}", e);
+                        // silently skip 404s (deleted/private forks)
+                        if !e.to_string().contains("404") {
+                            println!(
+                                "---->error fetching commits for {}/{}: {}",
+                                fork.owner_login, fork.name, e
+                            );
+                        }
                     }
                 }
             }
@@ -117,10 +123,10 @@ pub fn display_stat(repos: &[repo::Repo], lang: &str) {
     println!("Total forks: {}", total_forks);
     println!("Top-3 Most modified file per repo");
     for repo in repos {
-        // keep top 3 of the files
+        println!("Repo name: {}", repo.name);
+        // display top 3 of the files
         let top_three_files = compute_top_three(repo);
         for (index, (filename, count)) in top_three_files.iter().enumerate() {
-            println!("Repo name: {}", repo.name);
             println!(
                 "File name {}: {}, Modifications: {}",
                 index + 1,
