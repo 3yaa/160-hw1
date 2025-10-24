@@ -79,7 +79,7 @@ pub async fn get_commits_info(repo: &mut repo::Repo) {
             repo.top_modified_files.sort_by(|a, b| b.1.cmp(&a.1));
         }
         Err(e) => {
-            println!("   Error fetching commits: {}", e);
+            println!("----->error fetching commits: {}", e);
         }
     }
 }
@@ -104,7 +104,7 @@ pub fn compute_top_three(repo: &repo::Repo) -> Vec<(String, u32)> {
     repo.top_modified_files.iter().take(3).cloned().collect()
 }
 
-pub fn display_stat(repos: Vec<repo::Repo>, lang: &str) {
+pub fn display_stat(repos: &[repo::Repo], lang: &str) {
     // ADD UP FOR TOP 10
     let total_stars = compute_stars(&repos);
     let total_forks = compute_forks(&repos);
@@ -116,7 +116,7 @@ pub fn display_stat(repos: Vec<repo::Repo>, lang: &str) {
     println!("Total stars: {}", total_stars);
     println!("Total forks: {}", total_forks);
     println!("Top-3 Most modified file per repo");
-    for repo in &repos {
+    for repo in repos {
         // keep top 3 of the files
         let top_three_files = compute_top_three(repo);
         for (index, (filename, count)) in top_three_files.iter().enumerate() {

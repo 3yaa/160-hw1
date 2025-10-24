@@ -5,8 +5,8 @@ use std::error::Error;
 use std::fs;
 use std::path::Path;
 
-fn clone_repo(url: &str, lang: &str) -> Result<(), Box<dyn Error>> {
-    let path = format!("repo_cloned/{}", lang);
+fn clone_repo(url: &str, lang: &str, repo_name: &str) -> Result<(), Box<dyn Error>> {
+    let path = format!("repo_cloned/{}: {}", lang, repo_name);
 
     if Path::new(&path).exists() {
         fs::remove_dir_all(&path)?;
@@ -25,7 +25,7 @@ fn clone_repo(url: &str, lang: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 //
-pub async fn analyze_repo(
+async fn analyze_repo(
     owner: &str,
     repo: &str,
     default_branch: &str,
@@ -63,14 +63,14 @@ pub async fn analyze_repo(
     Ok(percentage >= 70)
 }
 
-pub async fn clone_top_repo(repos: Vec<repo::Repo>) {
-    for repo in &repos {
+pub async fn clone_top_repo(repos: &[repo::Repo]) {
+    for repo in repos {
         let valid_repo_to_clone =
             analyze_repo(&repo.owner_login, &repo.name, &repo.default_branch).await;
 
         match valid_repo_to_clone {
             Ok(true) => {
-                if let Err(e) = clone_repo(&repo.html_url, &repo.language) {
+                if let Err(e) = clone_repo(&repo.html_url, &repo.language, &repo.name) {
                     println!("----->error failed to clone {}: {}", repo.name, e);
                 }
             }
