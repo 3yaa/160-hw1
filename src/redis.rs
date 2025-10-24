@@ -28,4 +28,6 @@ pub async fn store_redis() -> redis::RedisResult<()> {
     let repo_info: HashMap<String, String> = con.hgetall("reponame:r1").await?;
 
     println!("Repo info: {:?}", repo_info);
+
+    Ok(())
 }
