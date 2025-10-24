@@ -5,6 +5,13 @@ use std::error::Error;
 use std::fs;
 use std::path::Path;
 
+/*
+purpose: clone a github repo locally---saved in repo_cloned/{langauge}/{repo_name}
+inputs:
+@url: github url for repo
+@lang: the language the repo is in
+@repo_name : repo name
+*/
 fn clone_repo(url: &str, lang: &str, repo_name: &str) -> Result<(), Box<dyn Error>> {
     let path = format!("repo_cloned/{}_{}", lang, repo_name);
 
@@ -24,7 +31,17 @@ fn clone_repo(url: &str, lang: &str, repo_name: &str) -> Result<(), Box<dyn Erro
 
     Ok(())
 }
-//
+
+/*
+purpose:
+check if a repo is a real repo with code and not just doc/tutorials by determining if at least 70% of its files are code files
+inputs:
+@owner: string of the original repo's owner name
+@repo_name : repo name
+@default_branch: the default branch of the repo the func will check
+output:
+a boolean of if the repo is a non doc/tutorial; or if there is an error then the error msg
+*/
 async fn analyze_repo(
     owner: &str,
     repo_name: &str,
@@ -63,6 +80,12 @@ async fn analyze_repo(
     Ok(percentage >= 70)
 }
 
+/*
+purpose:
+go through an array of repos and analyze; if pass then clone locally, immediately after returning
+inputs:
+@repo : a reference of an array of repos
+*/
 pub async fn clone_top_repo(repos: &[repo::Repo]) {
     for repo in repos {
         let valid_repo_to_clone =
@@ -72,6 +95,8 @@ pub async fn clone_top_repo(repos: &[repo::Repo]) {
             Ok(true) => {
                 if let Err(e) = clone_repo(&repo.html_url, &repo.language, &repo.name) {
                     println!("----->error failed to clone {}: {}", repo.name, e);
+                } else {
+                    break;
                 }
             }
             Ok(false) => continue,
