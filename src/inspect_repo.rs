@@ -87,11 +87,13 @@ inputs:
 @repo : a reference of an array of repos
 */
 pub async fn clone_top_repo(repos: &[repo::Repo]) {
+    // go through the 10 repos
     for repo in repos {
         let valid_repo_to_clone =
             analyze_repo(&repo.owner_login, &repo.name, &repo.default_branch).await;
 
         match valid_repo_to_clone {
+            // if its a valid repo->clone and then return
             Ok(true) => {
                 if let Err(e) = clone_repo(&repo.html_url, &repo.language, &repo.name) {
                     println!("----->error failed to clone {}: {}", repo.name, e);
@@ -99,6 +101,7 @@ pub async fn clone_top_repo(repos: &[repo::Repo]) {
                     break;
                 }
             }
+            // if its not valid then continue
             Ok(false) => continue,
             Err(e) => {
                 println!("----->error failed to analyze {}: {}", repo.name, e);
