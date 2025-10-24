@@ -42,7 +42,7 @@ pub async fn store_redis(repo: &repo::Repo) {
         return;
     }
 
-    let repo_info: HashMap<String, String> = match con.hgetall("reponame:r1").await {
+    let repo_info: HashMap<String, String> = match con.hgetall(&repo.name).await {
         Ok(info) => info,
         Err(e) => {
             eprintln!("Failed to get values from Redis: {:?}", e);
