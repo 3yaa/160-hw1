@@ -1,4 +1,4 @@
-use redis::{AsyncCommands, RedisResult};
+use redis::AsyncCommands;
 use std::collections::HashMap;
 
 use crate::models::repo;
@@ -21,19 +21,21 @@ pub async fn store_redis(repo: &repo::Repo) {
         }
     };
 
-    let res: Result<(), _> = con.hset_multiple(
-        repo.name.clone(),
-        &[
-            ("owner", repo.owner_login.clone()),
-            ("url", repo.html_url.clone()),
-            ("language", repo.language.clone()),
-            ("default_branch", repo.default_branch.clone()),
-            ("stars", repo.stars.to_string()),
-            ("forks_count", repo.forks_count.to_string()),
-            ("open_issues_count", repo.open_issues_count.to_string()),
-            ("fork_commit_count", repo.fork_commit_count.to_string()),
-        ],
-    ).await;
+    let res: Result<(), _> = con
+        .hset_multiple(
+            repo.name.clone(),
+            &[
+                ("owner", repo.owner_login.clone()),
+                ("url", repo.html_url.clone()),
+                ("language", repo.language.clone()),
+                ("default_branch", repo.default_branch.clone()),
+                ("stars", repo.stars.to_string()),
+                ("forks_count", repo.forks_count.to_string()),
+                ("open_issues_count", repo.open_issues_count.to_string()),
+                ("fork_commit_count", repo.fork_commit_count.to_string()),
+            ],
+        )
+        .await;
 
     if let Err(e) = res {
         eprintln!("Failed to set values in Redis: {:?}", e);
