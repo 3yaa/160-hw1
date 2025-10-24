@@ -1,33 +1,53 @@
-// use redis::{AsyncCommands, RedisResult};
-// use std::collections::HashMap;
+use redis::{AsyncCommands, RedisResult};
+use std::collections::HashMap;
 
-// pub async fn store_redis() -> redis::RedisResult<()> {
-//     // feel free to comment this part out after Part C
-//     // declare Redis client
-//     let client = redis::Client::open("redis://127.0.0.1/")?;
-//     let mut con = client.get_multiplexed_async_connection().await?;
+use crate::models::repo;
 
-//     // structure:
-//     // first parameter is the key (String), for us probably the repoName
-//     // second parameter is a list of tuples : &[(String, String), (String, String) ...]
-//     // essentially, first String of the tuple is like the key
-//     // second String of the tuple is like the value
+pub async fn store_redis(repo: &repo::Repo) {
+    // declare Redis client
+    let client = match redis::Client::open("redis://127.0.0.1/") {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("Failed to create Redis client: {:?}", e);
+            return;
+        }
+    };
 
-//     let _: () = con
-//         .hset_multiple(
-//             "reponame:r1",
-//             &[
-//                 ("url", "https://github.com/repos/r1"),
-//                 ("owner", "owner:u1"),
-//                 // add relevant tuples here depending on part C
-//             ],
-//         )
-//         .await?;
+    let mut con = match client.get_multiplexed_async_connection().await {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("Failed to get async connection: {:?}", e);
+            return;
+        }
+    };
 
-//     // Retrieve all fields
-//     let repo_info: HashMap<String, String> = con.hgetall("reponame:r1").await?;
+    let res: Result<(), _> = con.hset_multiple(
+        "reponame:r1",
+        &[
+            ("name", repo.name.clone()),
+            ("owner", repo.owner_login.clone()),
+            ("url", repo.html_url.clone()),
+            ("language", repo.language.clone()),
+            ("default_branch", repo.default_branch.clone()),
+            ("stars", repo.stars.to_string()),
+            ("forks_count", repo.forks_count.to_string()),
+            ("open_issues_count", repo.open_issues_count.to_string()),
+            ("fork_commit_count", repo.fork_commit_count.to_string()),
+        ],
+    ).await;
 
-//     println!("Repo info: {:?}", repo_info);
+    if let Err(e) = res {
+        eprintln!("Failed to set values in Redis: {:?}", e);
+        return;
+    }
 
-//     Ok(())
-// }
+    let repo_info: HashMap<String, String> = match con.hgetall("reponame:r1").await {
+        Ok(info) => info,
+        Err(e) => {
+            eprintln!("Failed to get values from Redis: {:?}", e);
+            return;
+        }
+    };
+
+    println!("Repo info: {:?}", repo_info);
+}

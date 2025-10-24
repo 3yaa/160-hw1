@@ -1,6 +1,7 @@
 use hw1::models::fork::{parse_fork, parse_forks};
 use hw1::models::repo::{Repo, parse_repo, parse_repos};
 use hw1::data_manager::{compute_stars, compute_forks, compute_fork_commits, compute_open_issues, compute_top_three};
+use hw1::redis::{store_redis};
 use serde_json::json;
 
 // TEST 1: parse_repo()
