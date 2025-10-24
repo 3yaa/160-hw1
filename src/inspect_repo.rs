@@ -1,4 +1,5 @@
 use crate::api;
+use crate::redis;
 use crate::repo;
 use git2::{FetchOptions, build::RepoBuilder};
 use std::error::Error;
@@ -98,6 +99,7 @@ pub async fn clone_top_repo(repos: &[repo::Repo]) {
                 if let Err(e) = clone_repo(&repo.html_url, &repo.language, &repo.name) {
                     println!("----->error failed to clone {}: {}", repo.name, e);
                 } else {
+                    redis::store_redis(repo).await;
                     break;
                 }
             }
