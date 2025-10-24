@@ -1,25 +1,14 @@
 mod api;
 mod data_manager;
 use crate::data_manager::{get_commits_info, get_forks_info};
-mod models;
-mod storage;
-mod redis;
 mod inspect;
-use std::collections::HashMap;
+mod models;
+mod redis;
 use std::error::Error;
 //
 use models::repo;
 
-// main function:
-// makes calls to helper functions:
-//      get_forks_info()
-//      get_commits_info()
-//
-// afterwards, print out relevant information regarding the repos
-//
-// then, clone and inspect repositories
-//
-// lastly, upload the repository details to Redis
+// main function: oscastrates through each part of the hw
 #[tokio::main] //sets up the async runtime  
 async fn main() -> Result<(), Box<dyn Error>> {
     // Add C later?
@@ -34,7 +23,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // for each repo, run heuristic to determine if it looks like source
         // store <String, int> into hashmap
         // github_url, number of stars
-        
+
         for repo in &mut repos {
             // fetch forks for repo
             get_forks_info(repo).await;

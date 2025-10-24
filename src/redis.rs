@@ -12,20 +12,20 @@ pub async fn store_redis() -> redis::RedisResult<()> {
     // second parameter is a list of tuples : &[(String, String), (String, String) ...]
     // essentially, first String of the tuple is like the key
     // second String of the tuple is like the value
-    
-    let _: () = con.hset_multiple(
-        "reponame:r1",
-        &[
-            ("url", "https://github.com/repos/r1"),
-            ("owner", "owner:u1"),
-            // add relevant tuples here depending on part C
-        ],
-    )
-    .await?;
+
+    let _: () = con
+        .hset_multiple(
+            "reponame:r1",
+            &[
+                ("url", "https://github.com/repos/r1"),
+                ("owner", "owner:u1"),
+                // add relevant tuples here depending on part C
+            ],
+        )
+        .await?;
 
     // Retrieve all fields
     let repo_info: HashMap<String, String> = con.hgetall("reponame:r1").await?;
 
     println!("Repo info: {:?}", repo_info);
 }
-    

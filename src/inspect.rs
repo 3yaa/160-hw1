@@ -1,5 +1,5 @@
+use git2::{FetchOptions, Repository, build::RepoBuilder};
 use std::path::Path;
-use git2::{Repository, FetchOptions, build::RepoBuilder};
 
 pub fn looks_like_source(files: &[String]) -> bool {
     let code_extentions = [".rs", ".java", ".c", ".cpp", ".h"];
