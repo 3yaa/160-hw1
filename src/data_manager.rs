@@ -83,3 +83,53 @@ pub async fn get_commits_info(repo: &mut repo::Repo) {
         }
     }
 }
+
+pub fn compute_stars(repos: &[repo::Repo]) -> u64 {
+    repos.iter().map(|r| r.stars).sum()
+}
+
+pub fn compute_forks(repos: &[repo::Repo]) -> u64 {
+    repos.iter().map(|r| r.forks_count).sum()
+}
+
+pub fn compute_fork_commits(repos: &[repo::Repo]) -> u64 {
+    repos.iter().map(|r| r.fork_commit_count).sum()
+}
+
+pub fn compute_open_issues(repos: &[repo::Repo]) -> u64 {
+    repos.iter().map(|r| r.open_issues_count).sum()
+}
+
+pub fn compute_top_three(repo: &repo::Repo) -> Vec<(String, u32)> {
+    repo.top_modified_files.iter().take(3).cloned().collect()
+}
+
+pub fn display_stat(repos: Vec<repo::Repo>, lang: &str) {
+    // ADD UP FOR TOP 10
+    let total_stars = compute_stars(&repos);
+    let total_forks = compute_forks(&repos);
+    let total_fork_commits = compute_fork_commits(&repos);
+    let total_open_issues = compute_open_issues(&repos);
+
+    // DISPLAY TOP 10
+    println!("Language: {}", lang);
+    println!("Total stars: {}", total_stars);
+    println!("Total forks: {}", total_forks);
+    println!("Top-3 Most modified file per repo");
+    for repo in &repos {
+        // keep top 3 of the files
+        let top_three_files = compute_top_three(repo);
+        for (index, (filename, count)) in top_three_files.iter().enumerate() {
+            println!("Repo name: {}", repo.name);
+            println!(
+                "File name {}: {}, Modifications: {}",
+                index + 1,
+                filename,
+                count
+            );
+        }
+    }
+    println!("New commits in forked repos: {}", total_fork_commits);
+    println!("Open issues in top-10 repos: {}", total_open_issues);
+    println!("--------------------------------------------");
+}
