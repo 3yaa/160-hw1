@@ -6,7 +6,7 @@ use std::fs;
 use std::path::Path;
 
 fn clone_repo(url: &str, lang: &str, repo_name: &str) -> Result<(), Box<dyn Error>> {
-    let path = format!("repo_cloned/{}: {}", lang, repo_name);
+    let path = format!("repo_cloned/{}_{}", lang, repo_name);
 
     if Path::new(&path).exists() {
         fs::remove_dir_all(&path)?;
