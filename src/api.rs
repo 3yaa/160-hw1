@@ -135,3 +135,28 @@ pub async fn fetch_commit_details(
     let commit_detail: Value = response.json().await?;
     Ok(commit_detail)
 }
+
+pub async fn fetch_repo_tree(
+    owner: &str,
+    repo: &str,
+    branch: &str,
+) -> Result<Vec<Value>, Box<dyn Error>> {
+    // set up url
+    let url = format!(
+        "https://api.github.com/repos/{}/{}/git/trees/{}?recursive=1",
+        owner, repo, branch
+    );
+
+    let client = reqwest::Client::new();
+    let response = client
+        .get(&url)
+        .header("User-Agent", "160-hw1")
+        .header("Authorization", format!("Bearer {}", get_token()))
+        .send()
+        .await?;
+
+    let json: Value = response.json().await?;
+    let tree = json["tree"].as_array().ok_or("No tree found")?.clone();
+
+    Ok(tree)
+}

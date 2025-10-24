@@ -7,6 +7,8 @@ pub struct Repo {
     pub html_url: String,
     #[allow(dead_code)]
     pub language: String,
+    #[allow(dead_code)]
+    pub default_branch: String,
     // stats
     pub stars: u64,
     pub forks_count: u64,
@@ -17,7 +19,7 @@ pub struct Repo {
 }
 
 // Purpose:
-// parse the json for relevant fields 
+// parse the json for relevant fields
 // inputs:
 // @json : the json containing relevant information to be parsed into the Repo object
 // return:
@@ -28,6 +30,7 @@ pub fn parse_repo(json: &Value) -> Option<Repo> {
         owner_login: json["owner"]["login"].as_str()?.to_string(),
         html_url: json["html_url"].as_str()?.to_string(),
         language: json["language"].as_str().unwrap_or("Unknown").to_string(),
+        default_branch: json["default_branch"].as_str()?.to_string(),
         stars: json["stargazers_count"].as_u64()?,
         forks_count: json["forks_count"].as_u64()?,
         open_issues_count: json["open_issues_count"].as_u64()?,
