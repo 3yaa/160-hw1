@@ -531,41 +531,40 @@ fn test_compute_top_three() {
 
 // TEST #10: store_redis()
 // NOTE: This is NOT a unit test, but rather, used to check if the redis function would work
-// #[tokio::test]
-// async fn test_store_redis() {
+#[tokio::test]
+async fn test_store_redis() {
     
-//     let dummy_repo = Repo {
-//         name: "test-repo".to_string(),
-//         owner_login: "test-owner".to_string(),
-//         html_url: "https://github.com/test-owner/test-repo".to_string(),
-//         language: "Rust".to_string(),
-//         default_branch: "main".to_string(),
-//         stars: 42,
-//         forks_count: 7,
-//         open_issues_count: 3,
-//         fork_commit_count: 10,
-//         top_modified_files: vec![("main.rs".to_string(), 5), ("lib.rs".to_string(), 3)],
-//     };
+    let dummy_repo = Repo {
+        name: "test-repo".to_string(),
+        owner_login: "test-owner".to_string(),
+        html_url: "https://github.com/test-owner/test-repo".to_string(),
+        language: "Rust".to_string(),
+        default_branch: "main".to_string(),
+        stars: 42,
+        forks_count: 7,
+        open_issues_count: 3,
+        fork_commit_count: 10,
+        top_modified_files: vec![("main.rs".to_string(), 5), ("lib.rs".to_string(), 3)],
+    };
     
-//     store_redis(&dummy_repo).await;
+    store_redis(&dummy_repo).await;
 
-//     let client = redis::Client::open("redis://127.0.0.1/").unwrap();
-//     let mut con = client.get_multiplexed_async_connection().await.unwrap();
+    let client = redis::Client::open("redis://127.0.0.1/").unwrap();
+    let mut con = client.get_multiplexed_async_connection().await.unwrap();
 
-//     let pong: String = redis::cmd("PING").query_async(&mut con).await.unwrap();
+    let pong: String = redis::cmd("PING").query_async(&mut con).await.unwrap();
 
-//     assert_eq!(pong, "PONG");
+    assert_eq!(pong, "PONG");
 
-//     let repo_info: HashMap<String, String> = con.hgetall("reponame:r1").await.unwrap();
+    let repo_info: HashMap<String, String> = con.hgetall("reponame:r1").await.unwrap();
 
-//     assert_eq!(repo_info.get("name").unwrap(), &dummy_repo.name);
-//     assert_eq!(repo_info.get("owner").unwrap(), &dummy_repo.owner_login);
-//     assert_eq!(repo_info.get("url").unwrap(), &dummy_repo.html_url);
-//     assert_eq!(repo_info.get("language").unwrap(), &dummy_repo.language);
-//     assert_eq!(repo_info.get("default_branch").unwrap(), &dummy_repo.default_branch);
-//     assert_eq!(repo_info.get("stars").unwrap(), &dummy_repo.stars.to_string());
-//     assert_eq!(repo_info.get("forks_count").unwrap(), &dummy_repo.forks_count.to_string());
-//     assert_eq!(repo_info.get("open_issues_count").unwrap(), &dummy_repo.open_issues_count.to_string());
-//     assert_eq!(repo_info.get("fork_commit_count").unwrap(), &dummy_repo.fork_commit_count.to_string());
+    assert_eq!(repo_info.get("owner").unwrap(), &dummy_repo.owner_login);
+    assert_eq!(repo_info.get("url").unwrap(), &dummy_repo.html_url);
+    assert_eq!(repo_info.get("language").unwrap(), &dummy_repo.language);
+    assert_eq!(repo_info.get("default_branch").unwrap(), &dummy_repo.default_branch);
+    assert_eq!(repo_info.get("stars").unwrap(), &dummy_repo.stars.to_string());
+    assert_eq!(repo_info.get("forks_count").unwrap(), &dummy_repo.forks_count.to_string());
+    assert_eq!(repo_info.get("open_issues_count").unwrap(), &dummy_repo.open_issues_count.to_string());
+    assert_eq!(repo_info.get("fork_commit_count").unwrap(), &dummy_repo.fork_commit_count.to_string());
 
-// }
+}

@@ -22,9 +22,8 @@ pub async fn store_redis(repo: &repo::Repo) {
     };
 
     let res: Result<(), _> = con.hset_multiple(
-        "reponame:r1",
+        repo.name.clone(),
         &[
-            ("name", repo.name.clone()),
             ("owner", repo.owner_login.clone()),
             ("url", repo.html_url.clone()),
             ("language", repo.language.clone()),
