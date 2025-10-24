@@ -46,15 +46,15 @@ pub async fn fetch_top_repos(language: &str) -> Result<Vec<Value>, Box<dyn Error
 // fetch the forks using the GitHub API
 // inputs:
 // @owner : String of the original repo's owner name
-// @repo : String of the original repo's name
+// @repo_name : String of the original repo's name
 // created:
 // @forks : Array of json containing information of the 20 most recent forks
-pub async fn fetch_forks(owner: &str, repo: &str) -> Result<Vec<Value>, Box<dyn Error>> {
+pub async fn fetch_forks(owner: &str, repo_name: &str) -> Result<Vec<Value>, Box<dyn Error>> {
     const MAX_FORKS: i8 = 20;
     // set url based on the original owner and the repo name
     let url = format!(
         "https://api.github.com/repos/{}/{}/forks?per_page={}&sort=newest",
-        owner, repo, MAX_FORKS
+        owner, repo_name, MAX_FORKS
     );
 
     let client = reqwest::Client::new();
@@ -75,19 +75,19 @@ pub async fn fetch_forks(owner: &str, repo: &str) -> Result<Vec<Value>, Box<dyn 
 // get the commits from a given repo
 // input:
 // @owner : String containing the owner name of the repo
-// @repo : String containing the repo
+// @repo_name : String containing the repo
 // @count : int, the number of commits to look at
 // created:
 // @commits : Array of json containing information about the commits of the given @repo
 pub async fn fetch_commits(
     owner: &str,
-    repo: &str,
+    repo_name: &str,
     count: u32,
 ) -> Result<Vec<Value>, Box<dyn Error>> {
     // set up url
     let url = format!(
         "https://api.github.com/repos/{}/{}/commits?per_page={}",
-        owner, repo, count
+        owner, repo_name, count
     );
 
     let client = reqwest::Client::new();
@@ -108,19 +108,19 @@ pub async fn fetch_commits(
 // get the commit details from a given repo
 // input:
 // @owner : String containing the owner name
-// @repo : String contaning the repo name
+// @repo_name : String contaning the repo name
 // @sha : String containing the sha used to get specific commit details
 // created:
 // @commit_detail : a json containing the commit details of a specific commit with @sha
 pub async fn fetch_commit_details(
     owner: &str,
-    repo: &str,
+    repo_name: &str,
     sha: &str,
 ) -> Result<Value, Box<dyn Error>> {
     // set up url
     let url = format!(
         "https://api.github.com/repos/{}/{}/commits/{}",
-        owner, repo, sha
+        owner, repo_name, sha
     );
 
     let client = reqwest::Client::new();
@@ -138,13 +138,13 @@ pub async fn fetch_commit_details(
 
 pub async fn fetch_repo_tree(
     owner: &str,
-    repo: &str,
+    repo_name: &str,
     branch: &str,
 ) -> Result<Vec<Value>, Box<dyn Error>> {
     // set up url
     let url = format!(
         "https://api.github.com/repos/{}/{}/git/trees/{}?recursive=1",
-        owner, repo, branch
+        owner, repo_name, branch
     );
 
     let client = reqwest::Client::new();

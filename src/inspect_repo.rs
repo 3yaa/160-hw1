@@ -27,7 +27,7 @@ fn clone_repo(url: &str, lang: &str, repo_name: &str) -> Result<(), Box<dyn Erro
 //
 async fn analyze_repo(
     owner: &str,
-    repo: &str,
+    repo_name: &str,
     default_branch: &str,
 ) -> Result<bool, Box<dyn Error>> {
     // all the valid code extentions
@@ -38,7 +38,7 @@ async fn analyze_repo(
     let mut code_files = 0;
 
     // make api call to fetch repo tree
-    let tree = api::fetch_repo_tree(owner, repo, default_branch).await?;
+    let tree = api::fetch_repo_tree(owner, repo_name, default_branch).await?;
 
     for item in &tree {
         // check if cur item is a file -- github ids file as "blob"
