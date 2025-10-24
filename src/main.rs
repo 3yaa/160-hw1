@@ -30,5 +30,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         inspect_repo::clone_top_repo(&repos).await;
     }
 
+    // save redis to disk
+    redis::save_redis_to_disk().await;
+
     Ok(())
 }

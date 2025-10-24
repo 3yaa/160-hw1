@@ -99,6 +99,7 @@ pub async fn clone_top_repo(repos: &[repo::Repo]) {
                 if let Err(e) = clone_repo(&repo.html_url, &repo.language, &repo.name) {
                     println!("----->error failed to clone {}: {}", repo.name, e);
                 } else {
+                    // stor ein redis
                     redis::store_redis(repo).await;
                     break;
                 }

@@ -52,3 +52,26 @@ pub async fn store_redis(repo: &repo::Repo) {
 
     println!("Repo info: {:?}", repo_info);
 }
+
+// save to disk
+pub async fn save_redis_to_disk() {
+    let client = match redis::Client::open("redis://127.0.0.1/") {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("Failed to create Redis client: {:?}", e);
+            return;
+        }
+    };
+
+    let mut con = match client.get_multiplexed_async_connection().await {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("Failed to get async connection: {:?}", e);
+            return;
+        }
+    };
+
+    // Force Redis to save to disk
+    let _: Result<String, _> = redis::cmd("BGSAVE").query_async(&mut con).await;
+    println!("Redis data saved to disk");
+}
