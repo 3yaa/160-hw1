@@ -23,7 +23,7 @@ use models::repo;
 #[tokio::main] //sets up the async runtime  
 async fn main() -> Result<(), Box<dyn Error>> {
     // Add C later?
-    let languages = vec!["Rust", "C", "C++", "Java"];
+    let languages = vec!["Rust", "C++", "Java"];
 
     // loop thru each lang
     for lang in languages {
@@ -31,6 +31,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let repos_json = api::fetch_top_repos(lang).await?;
         let mut repos = repo::parse_repos(repos_json);
         // process each repo
+        // for each repo, run heuristic to determine if it looks like source
+        // store <String, int> into hashmap
+        // github_url, number of stars
+        
         for repo in &mut repos {
             // fetch forks for repo
             get_forks_info(repo).await;
