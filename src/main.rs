@@ -10,7 +10,7 @@ use models::repo;
 // main function: oscastrates through each part of the hw
 #[tokio::main] //sets up the async runtime  
 async fn main() -> Result<(), Box<dyn Error>> {
-    let languages = vec!["Rust", "C", "C++", "Java"];
+    let languages = vec!["C++", "C", "Rust", "Java"];
 
     // loop thru each lang
     for lang in languages {

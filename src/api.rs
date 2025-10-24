@@ -3,32 +3,44 @@ use serde_json::Value;
 use std::env;
 use std::error::Error;
 
-// get token
+// get token -- export GITHUB_TOKEN="" in terminal
 fn get_token() -> String {
     env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN must be set")
 }
 
 // Purpose:
-// get the top repos via GitHub API
+// get the top 10 repos via GitHub API
 // input:
 // @language : String of what the language of the repos searched should be in
-// created:
+// ouput:
 // @items : Array of json containing the details of the first 10 repos
 pub async fn fetch_top_repos(language: &str) -> Result<Vec<Value>, Box<dyn Error>> {
     const MAX_REPOS: i8 = 10;
-    // set up url depending on language
-    let url: String = format!(
-        "https://api.github.com/search/repositories?q=language:{}&sort=stars&order=desc&per_page={}",
-        language, MAX_REPOS
-    );
 
     let client = reqwest::Client::new();
+    // build the query parameters
+    let query_string = format!("language:{}", language);
+    let params = [
+        ("q", query_string.as_str()),
+        ("sort", "stars"),
+        ("order", "desc"),
+        ("per_page", &MAX_REPOS.to_string()),
+    ];
+
     let response = client
-        .get(&url)
-        .header("User-Agent", "160-hw1") // User Agent name, 160-hw1
-        .header("Authorization", format!("Bearer {}", get_token())) // insert key (key not directly within the files)
-        .send() // send request to GitHub API
-        .await?; // await, return error if fail
+        .get("https://api.github.com/search/repositories")
+        .header("User-Agent", "160-hw1")
+        .header("Authorization", format!("Bearer {}", get_token()))
+        .query(&params)
+        .send()
+        .await?;
+
+    if !response.status().is_success() {
+        let status = response.status();
+        let error_text = response.text().await?;
+        eprintln!("API Error ({}): {}", status, error_text);
+        return Err(format!("GitHub API returned {}: {}", status, error_text).into());
+    }
 
     // get the json from response
     let json: Value = response.json().await?;
@@ -65,6 +77,13 @@ pub async fn fetch_forks(owner: &str, repo_name: &str) -> Result<Vec<Value>, Box
         .send()
         .await?;
 
+    if !response.status().is_success() {
+        let status = response.status();
+        let error_text = response.text().await?;
+        eprintln!("API Error ({}): {}", status, error_text);
+        return Err(format!("GitHub API returned {}: {}", status, error_text).into());
+    }
+
     // set forks to the list of json;
     // return error if failed
     let forks: Vec<Value> = response.json().await?;
@@ -98,6 +117,12 @@ pub async fn fetch_commits(
         .send()
         .await?;
 
+    if !response.status().is_success() {
+        let status = response.status();
+        let error_text = response.text().await?;
+        eprintln!("API Error ({}): {}", status, error_text);
+        return Err(format!("GitHub API returned {}: {}", status, error_text).into());
+    }
     // grab the list of json,
     // return error if failed
     let commits: Vec<Value> = response.json().await?;
@@ -130,6 +155,12 @@ pub async fn fetch_commit_details(
         .header("Authorization", format!("Bearer {}", get_token()))
         .send()
         .await?;
+    if !response.status().is_success() {
+        let status = response.status();
+        let error_text = response.text().await?;
+        eprintln!("API Error ({}): {}", status, error_text);
+        return Err(format!("GitHub API returned {}: {}", status, error_text).into());
+    }
 
     // commit_detail is a json
     let commit_detail: Value = response.json().await?;
@@ -154,6 +185,13 @@ pub async fn fetch_repo_tree(
         .header("Authorization", format!("Bearer {}", get_token()))
         .send()
         .await?;
+
+    if !response.status().is_success() {
+        let status = response.status();
+        let error_text = response.text().await?;
+        eprintln!("API Error ({}): {}", status, error_text);
+        return Err(format!("GitHub API returned {}: {}", status, error_text).into());
+    }
 
     let json: Value = response.json().await?;
     let tree = json["tree"].as_array().ok_or("No tree found")?.clone();
