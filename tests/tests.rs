@@ -1,5 +1,5 @@
-use hw1::models::repo::{parse_repo, parse_repos, Repo};
-use hw1::models::fork::{parse_fork, parse_forks, Fork};
+use hw1::models::fork::{parse_fork, parse_forks};
+use hw1::models::repo::{parse_repo, parse_repos};
 use serde_json::json;
 
 // TEST 1: parse_repo()
@@ -25,7 +25,6 @@ fn test_parse_repo_valid_json() {
     assert_eq!(repo.stars, 160);
     assert_eq!(repo.forks_count, 16);
     assert_eq!(repo.open_issues_count, 60);
-
 }
 
 // parse through a valid json with missing language
@@ -49,7 +48,6 @@ fn test_parse_repo_valid_json_no_language() {
     assert_eq!(repo.stars, 67);
     assert_eq!(repo.forks_count, 21);
     assert_eq!(repo.open_issues_count, 17);
-
 }
 
 // parse through a valid json with missing mandatory information
@@ -67,7 +65,6 @@ fn test_parse_repo_valid_json_missing_field() {
     });
 
     assert!(parse_repo(&data).is_none());
-
 }
 
 // TEST 2: parse_repos()
@@ -117,7 +114,7 @@ fn test_parse_repos_valid_input() {
     assert_eq!(repos[0].stars, 7);
     assert_eq!(repos[0].forks_count, 12);
     assert_eq!(repos[0].open_issues_count, 2);
-    
+
     assert_eq!(repos[1].name, "super-valid-repo");
     assert_eq!(repos[1].owner_login, "super-user");
     assert_eq!(repos[1].html_url, "www.super-valid_repo.com");
@@ -125,7 +122,7 @@ fn test_parse_repos_valid_input() {
     assert_eq!(repos[1].stars, 11);
     assert_eq!(repos[1].forks_count, 21);
     assert_eq!(repos[1].open_issues_count, 6);
-    
+
     assert_eq!(repos[2].name, "truly-valid-repo");
     assert_eq!(repos[2].owner_login, "truly-user");
     assert_eq!(repos[2].html_url, "www.truly-valid_repo.com");
@@ -133,7 +130,6 @@ fn test_parse_repos_valid_input() {
     assert_eq!(repos[2].stars, 2);
     assert_eq!(repos[2].forks_count, 31);
     assert_eq!(repos[2].open_issues_count, 7);
-
 }
 
 // json list with an invalid json
@@ -176,7 +172,7 @@ fn test_parse_repos_mixed_input() {
     assert_eq!(repos[0].stars, 7);
     assert_eq!(repos[0].forks_count, 12);
     assert_eq!(repos[0].open_issues_count, 2);
-    
+
     assert_eq!(repos[1].name, "another-valid-repo");
     assert_eq!(repos[1].owner_login, "another-user");
     assert_eq!(repos[1].html_url, "www.another-valid_repo.com");
@@ -202,7 +198,6 @@ fn test_parse_fork_valid_json() {
 
     assert_eq!(fork.name, "fork-spoon-knife");
     assert_eq!(fork.owner_login, "fork-owner");
-
 }
 
 // valid json, but owner is missing login
@@ -214,7 +209,6 @@ fn test_parse_fork_valid_json_missing_owner() {
     });
 
     assert!(parse_fork(&data).is_none());
-
 }
 
 // valid json, but missing name field
@@ -225,12 +219,11 @@ fn test_parse_fork_valid_json_missing_name() {
     });
 
     assert!(parse_fork(&data).is_none());
-
 }
 
 // TEST 4: parse_forks()
 
-// valid json array 
+// valid json array
 #[test]
 fn test_parse_forks_valid_json() {
     let fork_one = json!({
@@ -286,7 +279,4 @@ fn test_parse_forks_invalid_json() {
     assert_eq!(forks[0].owner_login, "user-one");
     assert_eq!(forks[1].name, "valid-user-three");
     assert_eq!(forks[1].owner_login, "user-three");
-
 }
-
-
