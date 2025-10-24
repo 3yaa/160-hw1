@@ -1,10 +1,12 @@
+use hw1::data_manager::{
+    compute_fork_commits, compute_forks, compute_open_issues, compute_stars, compute_top_three,
+};
 use hw1::models::fork::{parse_fork, parse_forks};
 use hw1::models::repo::{Repo, parse_repo, parse_repos};
-use hw1::data_manager::{compute_stars, compute_forks, compute_fork_commits, compute_open_issues, compute_top_three};
-use hw1::redis::{store_redis};
 use serde_json::json;
-use std::collections::HashMap;
-use redis::AsyncCommands;
+// use hw1::redis::store_redis;
+// use redis::AsyncCommands;
+// use std::collections::HashMap;
 
 // TEST 1: parse_repo()
 // parse through a valid json
@@ -342,10 +344,9 @@ fn test_compute_stars() {
             fork_commit_count: 4,
         },
     ];
-    
+
     let total_stars = compute_stars(&repos);
     assert_eq!(total_stars, 44);
-
 }
 
 // TEST 6: compute_forks()
@@ -391,10 +392,9 @@ fn test_compute_forks() {
             fork_commit_count: 4,
         },
     ];
-    
+
     let total_forks = compute_forks(&repos);
     assert_eq!(total_forks, 10);
-
 }
 
 // TEST 7: compute_fork_commits
@@ -440,10 +440,9 @@ fn test_compute_fork_commits() {
             fork_commit_count: 4,
         },
     ];
-    
+
     let total_fork_commits = compute_fork_commits(&repos);
     assert_eq!(total_fork_commits, 12);
-
 }
 
 // TEST 8: compute_open_issues()
@@ -488,10 +487,9 @@ fn test_compute_open_issues() {
             fork_commit_count: 4,
         },
     ];
-    
+
     let total_open_issues = compute_open_issues(&repos);
     assert_eq!(total_open_issues, 14);
-
 }
 
 // TEST 9: compute_top_three()
@@ -529,11 +527,11 @@ fn test_compute_top_three() {
     );
 }
 
-// // TEST #10: store_redis()
-// // NOTE: This is NOT a unit test, but rather, used to check if the redis function would work
+// TEST #10: store_redis()
+// NOTE: This is NOT a unit test, but rather, used to check if the redis function would work
 // #[tokio::test]
 // async fn test_store_redis() {
-    
+
 //     let dummy_repo = Repo {
 //         name: "test-repo".to_string(),
 //         owner_login: "test-owner".to_string(),
@@ -546,7 +544,7 @@ fn test_compute_top_three() {
 //         fork_commit_count: 10,
 //         top_modified_files: vec![("main.rs".to_string(), 5), ("lib.rs".to_string(), 3)],
 //     };
-    
+
 //     store_redis(&dummy_repo).await;
 
 //     let client = redis::Client::open("redis://127.0.0.1/").unwrap();
